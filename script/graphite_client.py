@@ -6,23 +6,21 @@ class GraphiteClient:
     def __init__(self, host):
         self.host = host
         self.port = 2003
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.host, self.port))
 
-    def graphite_connect(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.host, self.port))
-        return sock
+    def send_message(self, name, value, tstamp):
+        graphite_msg = "%s %s %s\n" % (name, value, tstamp)
+        self.sock.sendall(graphite_msg.encode('utf-8'))
 
-    def send_message(self, sock, path, msg):
-        graphite_msg = "%s %s %d" % (path, msg, 1)
-        sock.sendall(graphite_msg.encode('utf-8'))
-
-    def __del__(self, sock):
+    def __del__(self):
         try:
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
         except Exception as e:
-            sock.close()
-            print('Socket Exception: ' + e)
+            self.sock.close()
+            print('Socket Exception: ' + str(e))
+
 
 if __name__ == "__main__":
     main()

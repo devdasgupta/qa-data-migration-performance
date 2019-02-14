@@ -1,58 +1,23 @@
-import uuid
-import boto3
-import socket
-from datetime import datetime
+import logging
+import argparse
+import time
+from S3_Activity import S3Activity
+from graphite_client import GraphiteClient
+from datasetup import TestDataSetup
+from utility import config as c
 
 
-class S3Activity:
-
-    def __init__(self, bucket_name, profile):
-        self.bucket_name = bucket_name
-        self.profile = boto3.session.Session(profile_name=profile)
-        self.s3_resource = self.profile.resource('s3')
-
-    def upload_s3(self, filename, report_folder):
-
-        bucket = self.s3_resource.Bucket(name=self.bucket_name)
-        full_path = report_folder.strip() + filename.strip()
-
-        s3_object = self.s3_resource.Object(bucket.name, full_path)
-        s3_object.upload_file(filename)
-
-    def get_s3_details(self, folder):
-        bucket = self.s3_resource.Bucket(name=self.bucket_name)
-
-        msg_list = list()
-
-        for obj in bucket.objects.all():
-            fname = obj.key
-            if fname.startswith(folder):
-                s3_obj = self.s3_resource.Object(self.bucket_name, fname)
-                tstamp = int(datetime.strptime(str(s3_obj.last_modified), '%Y-%m-%d %H:%M:%S+00:00').strftime("%s"))
-                msg_list.append('{} 1 {}'.format(self.bucket_name, tstamp))
-
-        return msg_list
+TIME_LIMIT = 30
 
 
-class GraphiteClient:
-
-    def __init__(self, host):
-        self.host = host
-        self.port = 2003
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.host, self.port))
-
-    def send_message(self, name, value, tstamp):
-        graphite_msg = "%s %s %s\n" % (name, value, tstamp)
-        self.sock.sendall(graphite_msg.encode('utf-8'))
-
-    def __del__(self):
-        try:
-            self.sock.shutdown(socket.SHUT_RDWR)
-            self.sock.close()
-        except Exception as e:
-            self.sock.close()
-            print('Socket Exception: ' + str(e))
+def process_args():
+    parser = argparse.ArgumentParser(description='Fake Data generator for Interop')
+    parser.add_argument('customer', help='customer name')
+    parser.add_argument('-p', 'pipeline', nargs='+', help='record or dataclass type')
+    parser.add_argument(
+        '--count', type=int, help='number of records to create (default 1)', default=1)
+    arguments = parser.parse_args()
+    return arguments
 
 
 class TestExecution(S3Activity, GraphiteClient):
@@ -61,26 +26,49 @@ class TestExecution(S3Activity, GraphiteClient):
         GraphiteClient.__init__(self, host)
         S3Activity.__init__(self, bucket_name, profile)
 
-    def create_temp_file(self, size, file_name, file_content):
-        random_file_name = ''.join([str(uuid.uuid4().hex[:6]), file_name])
-        with open(random_file_name, 'w') as f:
-            f.write(str(file_content) * size)
-        return random_file_name
-
     def __del__(self):
         GraphiteClient.__del__(self)
 
 
 def main():
     profile = 'dev'
-    cloverleaf = TestExecution('syapse-performance-results', profile)
-    folder = 'Test_Upload/'
+    sftp_s3 = 'syapse-dev-sftp'
+    cloverleaf = S3Activity(sftp_s3, profile)
+    folder = 'files/extracts/AURORA/'
+    filename = 'patient_1000.csv'
 
-    for i in cloverleaf.get_s3_details(folder):
-        item = i.split()
-        path = 'Metrics.Test.' + item[0].replace('.', '-')
-        print(item[0], item[1], item[2])
-        cloverleaf.send_message(path, item[1], item[2])
+    # Create necessary file from Aurora using Cloversub utility
+
+
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+    logging.info('Starting the Phase I: Copying Data to SFTP location')
+    logging.info('File placed in S3 bucket {}'. format(sftp_s3))
+
+    # Put file in S3 SFTP location
+    cloverleaf.upload_s3(filename, folder)
+
+    # Check the S3 bucket iteratively when the file is picked by Cloverleaf
+    s3_files = [file.split()[0].split(':')[1][len(folder):] for file in cloverleaf.get_s3_details(folder)]
+    count = 0
+
+    while filename in s3_files and count < TIME_LIMIT:
+        count += 1
+        time.sleep(1)
+        s3_files = [file.split()[0].split(':')[1][len(folder):] for file in cloverleaf.get_s3_details(folder)]
+        print(s3_files)
+
+    if count == TIME_LIMIT:
+        logging.error('Time limit of {} exceeded'.format(TIME_LIMIT))
+    else:
+        logging.info('File {} got picked up by Cloverleaf'.format(filename))
+
+    # time.sleep(2)
+    # logging.info('Starting the Phase II: Monitoring the S3 bucket after XLATE operation')
+    # rabbitmq_s3 = 'syapse'
+    #
+    # rabbit = TestExecution(rabbitmq_s3, profile)
+    # res_folder = ''
+    # rabbit.get_s3_details(res_folder)
 
     del cloverleaf
 
