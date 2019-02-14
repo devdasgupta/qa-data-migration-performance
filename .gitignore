@@ -2,3 +2,7 @@
 __pycache__/
 .idea
 test*
+
+.eggs
+*.egg-info
+*.csv
