@@ -1,3 +1,7 @@
+"""
+    The below code is modified and incorporated from the existing CLoversub utilty used for fake data creation
+"""
+
 import importlib
 
 import lib.common as common
@@ -31,10 +35,11 @@ class TestDataSetup:
             data_converter = converter_object(number_records)
             file_format = customer_registered['format']
             file_path = f"{customer_registered['import_path'].replace('.', '/')}/{pipeline}"
-            print(file_path)
             data_converter.generate_fake_data(file_format, file_path)
         else:
             print(f'Could not find data generator for {customer}, {pipeline}')
+
+        return f"{file_path}.{file_format}"
 
 
 if __name__ == '__main__':
