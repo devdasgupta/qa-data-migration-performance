@@ -1,7 +1,7 @@
 GRAPHITE_ENDPOINT = "qa-api-performance-graphite"
 
 record_count = {
-    "Smoke": 1,
+    "Smoke": 10,
     "100K": 100000,
     "500K": 500000,
     "1M": 1000000,

@@ -13,10 +13,13 @@ TIME_LIMIT = 30
 def process_args():
     parser = argparse.ArgumentParser(description='Fake Data generator for Interop')
     parser.add_argument('customer', help='customer name')
-    parser.add_argument('-p', 'pipeline', nargs='+', help='record or dataclass type')
+    parser.add_argument('-p', '--pipeline', nargs='+', help='record or dataclass type')
     parser.add_argument(
-        '--count', type=int, help='number of records to create (default 1)', default=1)
+        '--count', help='Choose between Smoke, 100K, 500K, 1M, 5M and 10M',
+        choices=['Smoke', '100K', '500K', '1M', '5M', '10M'], default="Smoke")
+
     arguments = parser.parse_args()
+
     return arguments
 
 
@@ -37,15 +40,28 @@ def main():
     folder = 'files/extracts/AURORA/'
     filename = 'patient_1000.csv'
 
-    # Create necessary file from Aurora using Cloversub utility
-
-
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+    logging.info('Running pre-execution step for Test Data Setup (Creating Input file from Cloversub')
+
+    # Create necessary file from Aurora using Cloversub utility
+    arguments = process_args()
+    customer = arguments.customer.lower()
+    recordset = [x.lower() for x in arguments.pipeline.lower()]
+    record_count = arguments.count
+
+    test_files = list()
+
+    for pipeline in recordset:
+        data_set = TestDataSetup(customer, pipeline)
+        test_files.append(data_set.data_generator(record_count))
+
+    logging.info('Test Data setup completed')
+
     logging.info('Starting the Phase I: Copying Data to SFTP location')
-    logging.info('File placed in S3 bucket {}'. format(sftp_s3))
 
     # Put file in S3 SFTP location
     cloverleaf.upload_s3(filename, folder)
+    logging.info('File placed in S3 bucket {}'.format(sftp_s3))
 
     # Check the S3 bucket iteratively when the file is picked by Cloverleaf
     s3_files = [file.split()[0].split(':')[1][len(folder):] for file in cloverleaf.get_s3_details(folder)]
