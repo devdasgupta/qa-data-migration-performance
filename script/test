@@ -1,0 +1,47 @@
+*************************************************
+* SFTP credentials for clusters used by interop *
+*************************************************
+cluster-banana:
+    url: sftp1-uw2a-dev-banana.syapse.com
+    user: syapse-user
+    password: 98-RohuRA9S*8y,s([nGPEo5r-%-S]g$rd;,?1G9bny8y}E^58vC:/F$#Dg`,CzL
+    user: cloverleaf-user
+    password: B,)I_<aPFUTw+mA+1bJ?5%&g^eZ0D$%Idhg%4MIr*$*5J>h_n-XA$mIQ:P\KJBx^
+cluster-tangerine:
+    url: sftp1-uw2a-dev-tangerine.syapse.com
+    user: syapse-user
+    password: haFWaE33fzEOGzWSBpLFuSDhKb5Is1p2WUZDvc81EWxBEXIdcR5ofstmoqRW5tBw
+    user: cloverleaf-user
+    password: ZL2QbD4ghheOHNsOV0q14h30wpyV5ORfFo8MCtYtClTjDSciTE31fo08atD5HM6v
+
+cluster-performance:
+    url: sftp1-uw2a-dev-integration-perf.syapse.com
+    user: syapse-user
+    password: haFWaE33fzEOGzWSBpLFuSDhKb5Is1p2WUZDvc81EWxBEXIdcR5ofstmoqRW5tBw
+    user: cloverleaf-user
+    password: ZL2QbD4ghheOHNsOV0q14h30wpyV5ORfFo8MCtYtClTjDSciTE31fo08atD5HM6v
+cluster-pma-sqa:
+    url: sftp1-uw2a-sqa-pma.syapse.com
+    user: syapse-user
+    password: n8abQHIyRyfeIAcb7uiMqOxw7uuJ4GBwBgv1hkxD2f2pjgafuzDkTusP7BOT5pa7
+    user: cloverleaf-user
+    password: HxLhzh2IaX1Q0tdBl3SkqsoOgXVK1GUY1GFCmmeFoc1oqnZRTYBMeoUENd2uT2tt
+
+cluster-sapodilla-dev:
+    url: sftp-sapodilla-dev.syapse.com
+    user: cloverleaf-user
+    password: OK0r_%tthpHx*^FWG>Cm)ee\0[FvIv*r_KWqOqn<>qaDl!L/R;v7+:e]Rg_JIA(8
+
+cluster-banner-sqa:
+    url: sftp1-uw2a-sqa-banner.syapse.com
+    user: banner-user
+    password: Puj~nt3HFRCMtIz<I29Ol$YEHt1L0we4.hKdJ#Vdq3_KFgJ.G8rq9xC.Fm8D}Z<#
+    user: syapse-user
+    password: zt19-!X0~dm8hRsog$ia!y0o98e$S-2quGB8OK9mh%XT<OcHNJP4-UYcj><6<4EU
+cluster-black-dev
+hostname: sftp.dev.syapse.com (current)
+hostname: sftp-black-dev.syapse.com
+username: black-user
+password: 7e1#-D6GGni_l7mwHMKvySGsFJFb1Msm{038ij<oW3DGx>kGLX6NE33orgBm6NGM
+username: syapse-user
+password: 0lZ7ylti0h4iR#kKzIKjeN$f8ZO!NN.xXYYA5lolGsobjMSn4RHfvpI{KeBV~f9U
