@@ -1,0 +1,8 @@
+pysftp = "*"
+pyyaml = "*"
+boto3 = "*"
+jwt = "*"
+pyjwt = "*"
+psycopg2 = "*"
+elasticsearch = "*"
+faker = "*"
